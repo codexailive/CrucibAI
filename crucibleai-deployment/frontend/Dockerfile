@@ -1,15 +1,13 @@
-# ------------ build ------------
-FROM node:20-alpine AS build
-WORKDIR /app
-COPY package*.json ./
-# use install (not ci) so lock can update
-RUN npm install
-COPY . .
-RUN npm run build
-# normalize build output to /app/out (supports Vite "dist" or CRA "build")
-RUN if [ -d dist ]; then mv dist out; elif [ -d build ]; then mv build out; else echo "No build output directory (dist or build) found" && exit 1; fi
-
-# ------------ run ------------
-FROM nginx:alpine
-COPY nginx.conf /etc/nginx/nginx.conf
-COPY --from=build /app/out/ /usr/share/nginx/html
+# Ensure favicons are at the web root
+COPY public/favicon.ico /usr/share/nginx/html/
+COPY public/favicon-16x16.png /usr/share/nginx/html/
+COPY public/favicon-32x32.png /usr/share/nginx/html/
+COPY public/favicon-48x48.png /usr/share/nginx/html/
+COPY public/favicon-64x64.png /usr/share/nginx/html/
+COPY public/favicon-128x128.png /usr/share/nginx/html/
+COPY public/favicon-256x256.png /usr/share/nginx/html/
+COPY public/apple-touch-icon.png /usr/share/nginx/html/
+COPY public/android-chrome-192x192.png /usr/share/nginx/html/
+COPY public/android-chrome-384x384.png /usr/share/nginx/html/
+COPY public/android-chrome-512x512.png /usr/share/nginx/html/
+COPY public/site.webmanifest /usr/share/nginx/html/
