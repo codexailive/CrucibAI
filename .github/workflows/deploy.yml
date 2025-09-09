@@ -34,13 +34,13 @@ jobs:
         id: ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      # ⬇️ CHANGED: build from repo root (.) with explicit Dockerfile path
       - name: Build and push image
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG crucibleai-deployment/frontend
+          docker build -f crucibleai-deployment/frontend/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          # also tag latest for ECS convenience
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
@@ -64,4 +64,4 @@ jobs:
         run: |
           aws cloudfront create-invalidation \
             --distribution-id "${{ secrets.CF_DISTRIBUTION_ID }}" \
-            --paths "/*"
+            --paths "/index.html" "/static/*" "/"
