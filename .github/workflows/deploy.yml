@@ -1,34 +1,29 @@
-name: Deploy Frontend to ECS
+name: Build & Deploy Frontend to ECS
 
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch:
-
-env:
-  AWS_REGION: us-east-1
-  ECR_REGISTRY: 501046919247.dkr.ecr.us-east-1.amazonaws.com
-  ECR_REPOSITORY: crucibai/frontend
-  IMAGE_TAG: latest
-  CLUSTER: crucibai-cluster
-  SERVICE: crucibai-frontend-svc
-
-  # Your repo currently contains the app under this nested path:
-  CONTEXT: crucibleai-deployment/frontend
-  DOCKERFILE_PATH: crucibleai-deployment/frontend/Dockerfile
 
 permissions:
   contents: read
   id-token: write
 
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: 501046919247.dkr.ecr.us-east-1.amazonaws.com
+  ECR_REPOSITORY: crucibai/frontend
+  ECS_CLUSTER: crucibai-cluster
+  ECS_SERVICE: crucibai-frontend-svc
+
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials (secrets)
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -39,23 +34,34 @@ jobs:
         id: ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build image
+      - name: Build and push image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f $DOCKERFILE_PATH $CONTEXT
-
-      - name: Push image
-        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG crucibleai-deployment/frontend
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          # also tag latest for ECS convenience
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-      - name: Force new ECS deployment (pick up :latest)
+      - name: Force new ECS deployment
         run: |
-          aws ecs update-service --cluster "$CLUSTER" --service "$SERVICE" --force-new-deployment --region "$AWS_REGION"
+          aws ecs update-service \
+            --cluster "$ECS_CLUSTER" \
+            --service "$ECS_SERVICE" \
+            --force-new-deployment \
+            --region "$AWS_REGION" \
+            --output json
 
-      - name: Wait for service to stabilize
+      - name: Wait for service stable
         run: |
-          aws ecs wait services-stable --cluster "$CLUSTER" --services "$SERVICE" --region "$AWS_REGION"
+          aws ecs wait services-stable \
+            --cluster "$ECS_CLUSTER" \
+            --services "$ECS_SERVICE" \
+            --region "$AWS_REGION"
 
-      - name: Show service status
+      - name: Invalidate CloudFront
         run: |
-          aws ecs describe-services --cluster "$CLUSTER" --services "$SERVICE" \
-            --query "services[0].{desired:desiredCount,running:runningCount,taskDef:taskDefinition}" --output table --region "$AWS_REGION"
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ secrets.CF_DISTRIBUTION_ID }}" \
+            --paths "/*"
