@@ -1,0 +1,61 @@
+name: Deploy Frontend to ECS
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: 501046919247.dkr.ecr.us-east-1.amazonaws.com
+  ECR_REPOSITORY: crucibai/frontend
+  IMAGE_TAG: latest
+  CLUSTER: crucibai-cluster
+  SERVICE: crucibai-frontend-svc
+
+  # Your repo currently contains the app under this nested path:
+  CONTEXT: crucibleai-deployment/frontend
+  DOCKERFILE_PATH: crucibleai-deployment/frontend/Dockerfile
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (secrets)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build image
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f $DOCKERFILE_PATH $CONTEXT
+
+      - name: Push image
+        run: |
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Force new ECS deployment (pick up :latest)
+        run: |
+          aws ecs update-service --cluster "$CLUSTER" --service "$SERVICE" --force-new-deployment --region "$AWS_REGION"
+
+      - name: Wait for service to stabilize
+        run: |
+          aws ecs wait services-stable --cluster "$CLUSTER" --services "$SERVICE" --region "$AWS_REGION"
+
+      - name: Show service status
+        run: |
+          aws ecs describe-services --cluster "$CLUSTER" --services "$SERVICE" \
+            --query "services[0].{desired:desiredCount,running:runningCount,taskDef:taskDefinition}" --output table --region "$AWS_REGION"
