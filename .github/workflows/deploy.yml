@@ -34,12 +34,33 @@ jobs:
         id: ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # ⬇️ CHANGED: build from repo root (.) with explicit Dockerfile path
-      - name: Build and push image
+      # Build from repo root with explicit Dockerfile
+      - name: Build image (root context)
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -f crucibleai-deployment/frontend/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+
+      # ✅ Validate the image actually contains the JS bundle before pushing
+      - name: Validate build output exists
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker run --rm $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG sh -c '
+            set -e
+            ls -lah /usr/share/nginx/html/ || exit 1
+            # one of these must exist depending on your toolchain
+            if [ -d /usr/share/nginx/html/static/js ] || [ -d /usr/share/nginx/html/assets ]; then
+              echo "✅ Found JS bundle directory"
+            else
+              echo "❌ Missing JS bundle (static/js or assets) in image"; exit 2
+            fi
+          '
+
+      - name: Push image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
