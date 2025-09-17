@@ -1,8 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import {
-  LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
-} from 'recharts';
+import React, { useEffect, useState } from 'react';
 
 interface AnalyticsData {
   usageAnalytics: {
@@ -64,7 +60,7 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'usage' | 'performance' | 'business' | 'predictive'>('usage');
   const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d' | '90d'>('30d');
-  const [realTimeMetrics, setRealTimeMetrics] = useState<any[]>([]);
+  const [realTimeMetrics] = useState<any[]>([]);
 
   useEffect(() => {
     loadAnalyticsData();
@@ -186,7 +182,8 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
       { name: 'Memory Usage', value: Math.random() * 100, timestamp: new Date() },
       { name: 'Active Users', value: Math.floor(Math.random() * 100) + 1800, timestamp: new Date() },
     ];
-    setRealTimeMetrics(prev => [...prev.slice(-20), ...newMetrics]);
+    // Real-time metrics update disabled for now
+    // setRealTimeMetrics(prev => [...prev.slice(-20), ...newMetrics]);
   };
 
   const formatCurrency = (value: number) => {
@@ -362,15 +359,16 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
             {/* Top Features Chart */}
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Top Features Usage</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={data.usageAnalytics.topFeatures}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="feature" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="usage" fill="#3b82f6" />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="h-[300px] bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600 mb-2">
+                    {data.usageAnalytics.topFeatures.length} Features
+                  </div>
+                  <div className="text-gray-600 dark:text-gray-400">
+                    Usage Analytics Chart
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Growth Metrics */}
@@ -535,15 +533,16 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
             {/* Revenue by Tier */}
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Revenue by Tier</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={data.businessIntelligence.revenueByTier}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="tier" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                  <Bar dataKey="revenue" fill="#10b981" />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="h-[300px] bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600 mb-2">
+                    {formatCurrency(data.businessIntelligence.revenueByTier.reduce((sum: number, item: any) => sum + item.revenue, 0))}
+                  </div>
+                  <div className="text-gray-600 dark:text-gray-400">
+                    Total Revenue by Tier
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Cost Analysis */}
@@ -580,28 +579,30 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">User Growth Forecast</h3>
-                <ResponsiveContainer width="100%" height={250}>
-                  <LineChart data={data.predictiveInsights.userGrowthForecast}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="predictedUsers" stroke="#3b82f6" strokeWidth={2} />
-                  </LineChart>
-                </ResponsiveContainer>
+                <div className="h-[250px] bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600 mb-2">
+                      {data.predictiveInsights.userGrowthForecast[data.predictiveInsights.userGrowthForecast.length - 1]?.predictedUsers || 0}
+                    </div>
+                    <div className="text-gray-600 dark:text-gray-400">
+                      Predicted Users (Next Month)
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Revenue Forecast</h3>
-                <ResponsiveContainer width="100%" height={250}>
-                  <LineChart data={data.predictiveInsights.revenueForecast}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                    <Line type="monotone" dataKey="predictedRevenue" stroke="#10b981" strokeWidth={2} />
-                  </LineChart>
-                </ResponsiveContainer>
+                <div className="h-[250px] bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600 mb-2">
+                      {formatCurrency(data.predictiveInsights.revenueForecast[data.predictiveInsights.revenueForecast.length - 1]?.predictedRevenue || 0)}
+                    </div>
+                    <div className="text-gray-600 dark:text-gray-400">
+                      Predicted Revenue (Next Month)
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 

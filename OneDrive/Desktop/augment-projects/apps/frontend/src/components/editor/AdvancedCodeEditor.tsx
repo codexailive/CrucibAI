@@ -1,25 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
-import * as monaco from 'monaco-editor';
-import { 
-  Play, 
-  Save, 
-  Download, 
-  Upload, 
-  Settings, 
-  Maximize2, 
-  Minimize2, 
-  Split, 
-  Eye, 
-  Code, 
-  Terminal,
-  FileText,
-  Folder,
-  Plus,
-  X,
-  Search,
-  Replace,
-  Zap
+import {
+    Eye,
+    FileText,
+    Folder,
+    Maximize2,
+    Minimize2,
+    Play,
+    Plus,
+    Save,
+    Terminal,
+    X,
+    Zap
 } from 'lucide-react';
+import * as monaco from 'monaco-editor';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface FileTab {
   id: string;
@@ -215,7 +208,7 @@ const AdvancedCodeEditor: React.FC = () => {
   const [showPreview, setShowPreview] = useState(true);
   const [showTerminal, setShowTerminal] = useState(false);
   const [showFileExplorer, setShowFileExplorer] = useState(true);
-  const [settings, setSettings] = useState<EditorSettings>({
+  const [settings] = useState<EditorSettings>({
     theme: 'vs-dark',
     fontSize: 14,
     tabSize: 2,

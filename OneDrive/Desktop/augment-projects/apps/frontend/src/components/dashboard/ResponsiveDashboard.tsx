@@ -1,23 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  BarChart3, 
-  Zap, 
-  Users, 
-  Settings, 
-  Bell, 
-  Search, 
-  Menu, 
-  X, 
-  Home,
-  Code,
-  Database,
-  Cloud,
-  Shield,
-  Palette,
-  Monitor,
-  Smartphone,
-  Tablet
+import {
+    BarChart3,
+    Bell,
+    Cloud,
+    Code,
+    Database,
+    Home,
+    Menu,
+    Monitor,
+    Palette,
+    Search,
+    Settings,
+    Shield,
+    Smartphone,
+    Tablet,
+    Users,
+    X
 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 interface DashboardProps {
   userRole: 'developer' | 'non-technical' | 'admin';
@@ -37,7 +36,7 @@ const ResponsiveDashboard: React.FC<DashboardProps> = ({ userRole, deviceType })
   const [sidebarOpen, setSidebarOpen] = useState(deviceType === 'desktop');
   const [widgets, setWidgets] = useState<Widget[]>([]);
   const [activeView, setActiveView] = useState('overview');
-  const [notifications, setNotifications] = useState(3);
+  const [notifications] = useState(3);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -246,7 +245,7 @@ const ResponsiveDashboard: React.FC<DashboardProps> = ({ userRole, deviceType })
               <div key={key}>
                 <div className="flex justify-between text-sm mb-1">
                   <span className="text-gray-600 dark:text-gray-400 capitalize">{key}</span>
-                  <span className="text-gray-900 dark:text-white">{value}%</span>
+                  <span className="text-gray-900 dark:text-white">{String(value)}%</span>
                 </div>
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                   <div 

@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import * as THREE from 'three';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, TransformControls, Grid, Sky } from '@react-three/drei';
+import React, { useEffect, useState } from 'react';
+// Three.js imports temporarily disabled due to compatibility issues
+// import * as THREE from 'three';
+// import { Canvas } from '@react-three/fiber';
+// import { OrbitControls, TransformControls, Grid, Sky } from '@react-three/drei';
 
 interface ARVREditorProps {
   projectId: string;
@@ -185,38 +186,22 @@ const ARVREditor: React.FC<ARVREditorProps> = ({ projectId, onSceneUpdate }) => 
 
         {/* 3D Viewport */}
         <div className="viewport-container">
-          <Canvas
-            camera={{ position: [5, 5, 5], fov: 60 }}
+          <div
+            className="w-full h-full bg-gray-900 flex items-center justify-center rounded-lg"
             style={{ background: '#1a1a1a' }}
           >
-            <ambientLight intensity={0.4} />
-            <directionalLight position={[10, 10, 5]} intensity={1} />
-            
-            <Grid 
-              args={[20, 20]} 
-              cellSize={1} 
-              cellThickness={0.5} 
-              cellColor="#444444" 
-              sectionSize={5} 
-              sectionThickness={1} 
-              sectionColor="#666666" 
-            />
-            
-            <Sky sunPosition={[100, 20, 100]} />
-            
-            {objects.map(obj => (
-              <SceneObjectComponent
-                key={obj.id}
-                object={obj}
-                isSelected={selectedObject === obj.id}
-                transformMode={transformMode}
-                onUpdate={(updates) => updateObject(obj.id, updates)}
-                onClick={() => setSelectedObject(obj.id)}
-              />
-            ))}
-            
-            <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
-          </Canvas>
+            <div className="text-center text-white">
+              <div className="text-6xl mb-4">🥽</div>
+              <div className="text-xl font-bold mb-2">AR/VR Editor</div>
+              <div className="text-gray-400 mb-4">3D Scene Viewport</div>
+              <div className="text-sm text-gray-500">
+                Objects: {objects.length} | Selected: {selectedObject || 'None'}
+              </div>
+              <div className="mt-4 text-xs text-gray-600">
+                Three.js integration temporarily disabled
+              </div>
+            </div>
+          </div>
 
           {/* Viewport Overlay */}
           <div className="viewport-overlay">
@@ -256,73 +241,7 @@ const ARVREditor: React.FC<ARVREditorProps> = ({ projectId, onSceneUpdate }) => 
 };
 
 // Scene Object Component
-interface SceneObjectComponentProps {
-  object: SceneObject;
-  isSelected: boolean;
-  transformMode: 'translate' | 'rotate' | 'scale';
-  onUpdate: (updates: Partial<SceneObject>) => void;
-  onClick: () => void;
-}
-
-const SceneObjectComponent: React.FC<SceneObjectComponentProps> = ({
-  object,
-  isSelected,
-  transformMode,
-  onUpdate,
-  onClick
-}) => {
-  const meshRef = useRef<THREE.Mesh>(null);
-
-  const handleTransform = () => {
-    if (meshRef.current) {
-      const { position, rotation, scale } = meshRef.current;
-      onUpdate({
-        position: [position.x, position.y, position.z],
-        rotation: [rotation.x, rotation.y, rotation.z],
-        scale: [scale.x, scale.y, scale.z]
-      });
-    }
-  };
-
-  const renderGeometry = () => {
-    switch (object.type) {
-      case 'primitive':
-        if (object.name.toLowerCase().includes('sphere')) {
-          return <sphereGeometry args={[1, 32, 32]} />;
-        }
-        return <boxGeometry args={[1, 1, 1]} />;
-      default:
-        return <boxGeometry args={[1, 1, 1]} />;
-    }
-  };
-
-  return (
-    <group>
-      <mesh
-        ref={meshRef}
-        position={object.position}
-        rotation={object.rotation}
-        scale={object.scale}
-        onClick={onClick}
-      >
-        {renderGeometry()}
-        <meshStandardMaterial 
-          color={object.properties.color} 
-          transparent={isSelected}
-          opacity={isSelected ? 0.8 : 1}
-        />
-      </mesh>
-      
-      {isSelected && (
-        <TransformControls
-          object={meshRef.current!}
-          mode={transformMode}
-          onObjectChange={handleTransform}
-        />
-      )}
-    </group>
-  );
-};
+// SceneObjectComponent and related interfaces temporarily removed due to Three.js compatibility issues
 
 // Object Properties Panel
 interface ObjectPropertiesProps {
@@ -466,28 +385,18 @@ const ARVRPreviewModal: React.FC<ARVRPreviewModalProps> = ({ mode, objects, onCl
             </div>
           ) : (
             <div className="preview-container">
-              <Canvas camera={{ position: [0, 1.7, 3], fov: 90 }}>
-                <ambientLight intensity={0.6} />
-                <directionalLight position={[5, 5, 5]} intensity={0.8} />
-                
-                {objects.map(obj => (
-                  <mesh
-                    key={obj.id}
-                    position={obj.position}
-                    rotation={obj.rotation}
-                    scale={obj.scale}
-                  >
-                    {obj.name.toLowerCase().includes('sphere') ? (
-                      <sphereGeometry args={[1, 32, 32]} />
-                    ) : (
-                      <boxGeometry args={[1, 1, 1]} />
-                    )}
-                    <meshStandardMaterial color={obj.properties.color} />
-                  </mesh>
-                ))}
-                
-                <OrbitControls enablePan={false} enableZoom={false} />
-              </Canvas>
+              <div className="w-full h-full bg-gray-800 flex items-center justify-center rounded-lg">
+                <div className="text-center text-white">
+                  <div className="text-4xl mb-3">👁️</div>
+                  <div className="text-lg font-bold mb-2">{mode.toUpperCase()} Preview</div>
+                  <div className="text-gray-400 mb-3">
+                    {objects.length} objects in scene
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    3D preview temporarily disabled
+                  </div>
+                </div>
+              </div>
               
               <div className="preview-controls">
                 <button className="control-button">Reset View</button>

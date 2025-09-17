@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Filter, Star, Download, Shield, Zap, Code, Database, Cloud, Users, BarChart, Lock, Package } from 'lucide-react';
+import { BarChart, Cloud, Code, Download, Filter, Lock, Package, Search, Shield, Star, Users, Zap } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 interface Plugin {
   id: string;
