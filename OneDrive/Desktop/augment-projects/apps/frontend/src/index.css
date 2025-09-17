@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CrucibleAI custom styles */
+body {
+  @apply bg-gradient-to-br from-primary-500 to-primary-400 text-primary-50 min-h-screen;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+}
+
+.glass-card {
+  @apply bg-white/10 backdrop-blur-lg rounded-2xl shadow-glass border border-primary-400;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: #181c2c;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2e4d;
+  border-radius: 8px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply text-primary-100 font-bold;
+}
+
+a {
+  @apply text-primary-200 underline hover:text-primary-300;
+}
+
+button {
+  @apply font-semibold rounded-lg transition;
+}
+
+input, textarea {
+  @apply bg-primary-500 text-primary-50 border border-primary-400 rounded-lg p-3 mb-2;
+}
+
+.card {
+  @apply bg-white/10 rounded-xl p-8 my-4 shadow-glass;
+}
+
+.read-the-docs {
+  @apply opacity-60 text-sm mt-8;
+}

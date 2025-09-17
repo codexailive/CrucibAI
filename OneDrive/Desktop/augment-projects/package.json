@@ -1,0 +1,66 @@
+{
+  "name": "crucibleai-platform",
+  "version": "3.0.0",
+  "description": "The world's most advanced AI development platform",
+  "main": "apps/backend/dist/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd apps/backend && npm run dev",
+    "dev:frontend": "cd apps/frontend && npm run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd apps/backend && npm run build",
+    "build:frontend": "cd apps/frontend && npm run build",
+    "start": "npm run start:backend",
+    "start:backend": "cd apps/backend && npm start",
+    "start:frontend": "cd apps/frontend && npm run preview",
+    "deploy": "npm run build && npm run deploy:vercel",
+    "deploy:vercel": "vercel --prod",
+    "deploy:netlify": "netlify deploy --prod --dir apps/frontend/dist",
+    "deploy:railway": "railway up",
+    "deploy:render": "render-build",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd apps/backend && npm test",
+    "test:frontend": "cd apps/frontend && npm test",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "format": "prettier --write .",
+    "db:generate": "cd apps/backend && npx prisma generate",
+    "db:push": "cd apps/backend && npx prisma db push",
+    "db:migrate": "cd apps/backend && npx prisma migrate dev",
+    "db:studio": "cd apps/backend && npx prisma studio",
+    "postinstall": "echo 'Skipping postinstall for demo'"
+  },
+  "keywords": [
+    "ai",
+    "quantum-computing",
+    "ar-vr",
+    "collaboration",
+    "deployment",
+    "analytics",
+    "marketplace",
+    "enterprise"
+  ],
+  "author": "CrucibleAI Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "workspaces": [
+    "apps/backend",
+    "apps/frontend"
+  ],
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "concurrently": "^8.2.0",
+    "eslint": "^8.45.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@langchain/core": "^0.3.76",
+    "@langchain/openai": "^0.6.12",
+    "dotenv": "^16.3.1"
+  }
+}

@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id                String   @id @default(cuid())
+  encrypted_email   String   @unique
+  email             String   @unique
+  name              String
+  encrypted_password String
+  passwordHash      String
+  stripeCustomerId  String?
+  mfaEnabled        Boolean  @default(false)
+  mfaSecret         String?
+  lastActiveAt      DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  subscription      UserSubscription?
+  deploymentPurchases DeploymentPurchase[]
+  activeDeployments ActiveDeployment[]
+  overageCharges    OverageCharge[]
+  usageAlerts       UsageAlert[]
+  supportTickets    SupportTicket[]
+  ticketReplies     TicketReply[]
+  usageTracking     UsageTracking[]
+}
+
+model DeploymentPurchase {
+  id        String   @id @default(cuid())
+  userId    String
+  tier      String   // Starter, Professional, etc.
+  quantity  Int      // Number of deployments
+  price     Float    // Total paid
+  status    String   // active, expired
+  purchasedAt DateTime @default(now())
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model ActiveDeployment {
+  id        String   @id @default(cuid())
+  userId    String
+  purchaseId String
+  name      String
+  platform  String   // Vercel, AWS, etc.
+  status    String   // deploying, active, failed
+  url       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model OverageCharge {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // ai_calls, quantum, storage, etc.
+  amount    Float    // Charge amount
+  units     Int      // Units over limit
+  rate      Float    // Per-unit rate
+  billedAt  DateTime @default(now())
+  status    String   // pending, paid, failed
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model UsageAlert {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // ai_calls, quantum, etc.
+  threshold Float    // 0.8 = 80% of limit
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model SupportTicket {
+  id        String   @id @default(cuid())
+  userId    String
+  subject   String
+  message   String
+  status    String   // open, in_progress, resolved
+  priority  String   // low, medium, high, urgent
+  category  String   // billing, technical, feature
+  assignedTo String?  // Agent ID
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+  replies TicketReply[]
+}
+
+model TicketReply {
+  id        String   @id @default(cuid())
+  ticketId  String
+  userId    String
+  message   String
+  isInternal Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+}
+
+model KnowledgeBaseArticle {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   // Markdown
+  category  String
+  tags      String
+  published Boolean  @default(true)
+  views     Int      @default(0)
+  helpful   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserSubscription {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  tier                  String   // Discovery, Starter, Professional, Business, Team, Enterprise, Unlimited
+  status                String   // active, cancelled, payment_failed
+  billingCycle          String   @default("monthly") // monthly, annual
+  nextBillingDate       DateTime
+  annualDiscount        Float    @default(0.167) // 16.7% discount
+  autoRenew             Boolean  @default(true)
+  renewalReminderSent   Boolean  @default(false)
+  stripeSubscriptionId  String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+}
+
+model UsageTracking {
+  id        String   @id @default(cuid())
+  userId    String
+  service   String   // AI_CALLS, QUANTUM_JOBS, etc.
+  amount    Int
+  month     String   // YYYY-MM format
+  timestamp DateTime @default(now())
+  metadata  String?  // JSON string for additional data
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, month])
+}
