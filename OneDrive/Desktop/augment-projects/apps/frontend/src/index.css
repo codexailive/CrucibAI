@@ -1,46 +1,69 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* @tailwind directives require Tailwind CSS processing. 
+   Uncomment these lines only if Tailwind CSS is set up in your build process. */
+/* @tailwind base; */
+/* @tailwind components; */
+/* @tailwind utilities; */
 
 /* CrucibleAI custom styles */
 body {
-  @apply bg-gradient-to-br from-primary-500 to-primary-400 text-primary-50 min-h-screen;
-  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  /* Equivalent to Tailwind's bg-gradient-to-br from-primary-500 to-primary-400 text-primary-50 min-h-screen */
+  background: linear-gradient(to bottom right, #6366f1, #818cf8); /* Replace with your actual primary-500 and primary-400 colors */
+  color: #f5f3ff; /* Replace with your actual primary-50 color */
+  min-height: 100vh;
 }
 
+/* CrucibleAI custom styles */
 .glass-card {
-  @apply bg-white/10 backdrop-blur-lg rounded-2xl shadow-glass border border-primary-400;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(16px);
+  border-radius: 1rem;
+  box-shadow: 0 4px 32px 0 rgba(31, 38, 135, 0.37); /* Example glass shadow */
+  border: 1px solid #818cf8; /* Replace with your actual primary-400 color */
 }
+/* .glass-card Tailwind @apply removed for standard CSS compatibility */
 
 ::-webkit-scrollbar {
   width: 8px;
-  background: #181c2c;
-}
-::-webkit-scrollbar-thumb {
-  background: #2a2e4d;
-  border-radius: 8px;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  @apply text-primary-100 font-bold;
+  color: #e0e7ff; /* Replace with your actual primary-100 color */
+  font-weight: bold;
 }
 
 a {
-  @apply text-primary-200 underline hover:text-primary-300;
+  color: #c7d2fe; /* Replace with your actual primary-200 color */
+  text-decoration: underline;
+  transition: color 0.2s;
 }
 
 button {
-  @apply font-semibold rounded-lg transition;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
 }
 
 input, textarea {
-  @apply bg-primary-500 text-primary-50 border border-primary-400 rounded-lg p-3 mb-2;
+  background: #6366f1; /* Replace with your actual primary-500 color */
+  color: #f5f3ff; /* Replace with your actual primary-50 color */
+  border: 1px solid #818cf8; /* Replace with your actual primary-400 color */
 }
 
 .card {
-  @apply bg-white/10 rounded-xl p-8 my-4 shadow-glass;
+  background: rgba(255,255,255,0.1);
+  border-radius: 0.75rem;
+  padding: 2rem;
 }
 
 .read-the-docs {
-  @apply opacity-60 text-sm mt-8;
+  opacity: 0.6;
+  font-size: 0.875rem;
+  margin-top: 2rem;
 }
+
+h1, h2, h3, h4, h5, h6 {
+  color: #e0e7ff; /* Equivalent to text-primary-100 */
+  font-weight: bold;
+}
+
+/* Tailwind @apply rules removed for standard CSS compatibility */

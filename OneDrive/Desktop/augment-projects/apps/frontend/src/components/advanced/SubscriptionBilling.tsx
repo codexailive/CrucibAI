@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
 const SubscriptionBilling: React.FC = () => {
-  const [plan, setPlan] = useState('Professional');
-  const [price, setPrice] = useState(59);
+  const [plan] = useState('Professional');
+  const [price] = useState(59);
   const [invoices, setInvoices] = useState<any[]>([]);
 
   useEffect(() => {

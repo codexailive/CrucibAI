@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 const OverageBilling: React.FC = () => {
   const [usage, setUsage] = useState<number>(0);
-  const [quota, setQuota] = useState<number>(10 * 1024 * 1024); // 10MB for demo
+  const [quota] = useState<number>(10 * 1024 * 1024); // 10MB for demo
   const [overage, setOverage] = useState<number>(0);
 
   useEffect(() => {
