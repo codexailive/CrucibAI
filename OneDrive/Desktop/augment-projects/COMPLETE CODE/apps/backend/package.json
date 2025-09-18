@@ -48,6 +48,6 @@
     "swagger-ui-express": "^5.0.0",
     "tsx": "^4.7.0",
     "typescript": "^5.4.5",
-    "vitest": "^1.6.0"
+    "vitest": "^3.2.4"
   }
 }
