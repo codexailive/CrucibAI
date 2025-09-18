@@ -1,12 +1,12 @@
-import { PrismaClient } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
-
-const prisma = new PrismaClient();
 
 export interface AuthRequest extends Request {
   user?: {
     id: string;
-    role: 'user' | 'admin';
+    email: string;
+    name: string;
+    role?: 'user' | 'admin';
+    subscription?: any;
   };
 }
 
@@ -18,7 +18,12 @@ export const requireAuth = async (req: AuthRequest, res: Response, next: NextFun
     // Assume JWT verification here (use jsonwebtoken if installed)
     // For example: const decoded = jwt.verify(token, process.env.JWT_SECRET);
     // req.user = decoded as any;
-    req.user = { id: 'user1', role: 'admin' }; // Mock for now
+    req.user = {
+      id: 'user1',
+      email: 'admin@example.com',
+      name: 'Admin User',
+      role: 'admin'
+    }; // Mock for now
     next();
   } catch (error) {
     res.status(401).json({ error: 'Invalid token' });
@@ -27,7 +32,7 @@ export const requireAuth = async (req: AuthRequest, res: Response, next: NextFun
 
 export const requireRole = (roles: ('user' | 'admin')[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
-    if (!req.user || !roles.includes(req.user.role)) {
+    if (!req.user || !req.user.role || !roles.includes(req.user.role)) {
       return res.status(403).json({ error: 'Forbidden' });
     }
     next();

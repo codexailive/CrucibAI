@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "ESNext",
+    "moduleResolution": "NodeNext",
+    "allowJs": false,
+    "checkJs": false,
+    "strict": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@services/*": ["apps/backend/src/services/*"],
+      "@routes/*": ["apps/backend/src/routes/*"],
+      "@middleware/*": ["apps/backend/src/middleware/*"],
+      "@webhooks/*": ["apps/backend/src/webhooks/*"]
+    },
+    "types": ["node", "vitest", "react", "react-dom"]
+  },
+  "include": ["apps/**/*", "services/**/*", "packages/**/*"],
+  "exclude": ["node_modules", "dist", "build", ".turbo", ".next"]
+}

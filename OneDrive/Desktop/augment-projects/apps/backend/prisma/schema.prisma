@@ -132,6 +132,8 @@ model UserSubscription {
   status                String   // active, cancelled, payment_failed
   billingCycle          String   @default("monthly") // monthly, annual
   nextBillingDate       DateTime
+  currentPeriodStart    DateTime?
+  currentPeriodEnd      DateTime?
   annualDiscount        Float    @default(0.167) // 16.7% discount
   autoRenew             Boolean  @default(true)
   renewalReminderSent   Boolean  @default(false)
@@ -155,4 +157,119 @@ model UsageTracking {
   user User @relation(fields: [userId], references: [id])
 
   @@unique([userId, month])
+}
+
+model AuditLogEntry {
+  id        String   @id @default(cuid())
+  eventId   String   @unique
+  action    String
+  userId    String
+  data      String?  // JSON data
+  createdAt DateTime @default(now())
+}
+
+model EncryptionSettings {
+  id         String    @id @default(cuid())
+  enabled    Boolean   @default(false)
+  algorithm  String?
+  keyId      String?
+  rotatedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model ServiceConfig {
+  id                   String   @id @default(cuid())
+  name                 String   @unique
+  auditLoggingEnabled  Boolean  @default(false)
+  config               String?  // JSON config
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model ComplianceEvidence {
+  id        String   @id @default(cuid())
+  type      String   // automated, manual
+  standard  String   // SOC2, GDPR, etc.
+  control   String
+  evidence  String   // JSON evidence data
+  createdAt DateTime @default(now())
+}
+
+model Attestation {
+  id        String   @id @default(cuid())
+  type      String
+  subject   String
+  issuer    String
+  issuedAt  DateTime @default(now())
+  expiresAt DateTime?
+  data      String?  // JSON attestation data
+}
+
+model Documentation {
+  id        String   @id @default(cuid())
+  title     String
+  type      String   // compliance, technical, etc.
+  content   String?  // Markdown or JSON content
+  url       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model QuantumJob {
+  id          String    @id @default(cuid())
+  userId      String
+  graphId     String
+  type        String    // qaoa_optimization, vqe, etc.
+  status      String    // running, completed, failed
+  priority    String    // low, medium, high
+  backend     String    // braket, qiskit, etc.
+  result      String?   // JSON result
+  error       String?
+  createdAt   DateTime  @default(now())
+  startedAt   DateTime?
+  completedAt DateTime?
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  eventId   String   @unique
+  action    String
+  userId    String
+  data      String?  // JSON data
+  createdAt DateTime @default(now())
+}
+
+model ARVRSession {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // AR, VR
+  sceneData String?  // JSON scene data
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MarketplaceInstallation {
+  id          String   @id @default(cuid())
+  userId      String
+  packageId   String
+  packageName String
+  version     String
+  status      String   // installed, active, disabled
+  installedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model QuantumCircuit {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  circuitData String   // JSON circuit definition
+  gates       String   // JSON gates array
+  qubits      Int
+  depth       Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

@@ -138,7 +138,7 @@ export class OpenAIService {
 
     try {
       // Create a File-like object from the buffer
-      const file = new File([audioBuffer], 'audio.wav', { type: 'audio/wav' });
+      const file = new File([new Uint8Array(audioBuffer)], 'audio.wav', { type: 'audio/wav' });
 
       const response = await this.client.audio.transcriptions.create({
         file: file,

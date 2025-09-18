@@ -2,6 +2,14 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+export enum CreditUsageType {
+  AI_CALL = 'AI_CALL',
+  QUANTUM_JOB = 'QUANTUM_JOB',
+  STORAGE = 'STORAGE',
+  DEPLOYMENT = 'DEPLOYMENT',
+  ARVR_SESSION = 'ARVR_SESSION'
+}
+
 export class AdvancedCreditsService {
   async getUserCredits(userId: string) {
     // Mock implementation - return demo credits
@@ -26,6 +34,16 @@ export class AdvancedCreditsService {
     return {
       success: true,
       newTotal: 1000 + amount
+    };
+  }
+
+  async consumeCredits(userId: string, usageType: CreditUsageType, amount: number) {
+    // Mock implementation - always succeed
+    return {
+      success: true,
+      remaining: Math.max(0, 1000 - amount),
+      usageType,
+      consumed: amount
     };
   }
 

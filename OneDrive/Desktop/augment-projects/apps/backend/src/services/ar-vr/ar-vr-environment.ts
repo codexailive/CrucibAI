@@ -25,7 +25,7 @@ export class ARVREnvironmentService {
       // Consume credits for XR session
       await creditsService.consumeCredits(userId, CreditUsageType.AI_CALL, 10); // 10 credits for session
 
-      const sessionId = `xr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const sessionId = `xr_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
       const session: ARVRSession = {
         id: sessionId,
         userId,
@@ -42,7 +42,7 @@ export class ARVREnvironmentService {
       this.sessions.set(sessionId, session);
 
       // Store in DB if needed
-      await prisma.arVRSession.create({
+      await prisma.aRVRSession.create({
         data: {
           id: sessionId,
           userId,
@@ -67,7 +67,7 @@ export class ARVREnvironmentService {
     session.updatedAt = new Date();
 
     // Update DB
-    await prisma.arVRSession.update({
+    await prisma.aRVRSession.update({
       where: { id: sessionId },
       data: {
         sceneData: JSON.stringify(session.sceneData),
@@ -85,7 +85,7 @@ export class ARVREnvironmentService {
     session.active = false;
 
     // Update DB
-    await prisma.arVRSession.update({
+    await prisma.aRVRSession.update({
       where: { id: sessionId },
       data: {
         active: false,
