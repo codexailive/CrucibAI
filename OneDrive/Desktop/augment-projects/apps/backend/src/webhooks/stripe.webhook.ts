@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { Request, Response } from 'express';
 
 const prisma = new PrismaClient();
 
@@ -128,7 +128,8 @@ async function handleSubscriptionCreated(subscription: any): Promise<void> {
         stripeSubscriptionId: subscriptionId,
         status: subscription.status,
         currentPeriodStart: new Date(subscription.current_period_start * 1000),
-        currentPeriodEnd: new Date(subscription.current_period_end * 1000)
+        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        nextBillingDate: new Date(subscription.current_period_end * 1000)
       }
     });
 

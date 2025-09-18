@@ -45,19 +45,17 @@ export class QuantumComputingService {
     const installations = await this.prisma.marketplaceInstallation.findMany({
       where: {
         userId,
-        item: {
-          category,
-        },
-      },
-      include: {
-        item: true,
-      },
+        // Filter by package name containing category for now
+        packageName: {
+          contains: category
+        }
+      }
     });
 
     return installations.map(inst => ({
-      id: inst.item.id,
-      name: inst.item.name,
-      config: inst.item.metadata || {},
+      id: inst.id,
+      name: inst.packageName,
+      config: {}, // Mock config for now
     }));
   }
 
@@ -197,6 +195,7 @@ export class QuantumComputingService {
           type: 'qaoa_optimization',
           status: 'failed',
           priority: 'high',
+          backend: 'braket',
           error: error instanceof Error ? error.message : 'Unknown error',
           createdAt: new Date(),
         },
@@ -239,6 +238,7 @@ export class QuantumComputingService {
         type: 'classical_fallback',
         status: 'completed',
         priority: 'medium',
+        backend: 'classical',
         result: JSON.stringify({ order, time: estimatedTime, fallback: true }),
         createdAt: new Date(),
         completedAt: new Date(),
@@ -384,7 +384,7 @@ export class QuantumComputingService {
     for (const taskId of order) {
       const node = nodes.find(n => n.id === taskId)!;
       const depMax = node.dependencies.reduce(
-        (max, depId) => Math.max(max, startTimes.get(depId) || 0),
+        (max: number, depId: string) => Math.max(max, startTimes.get(depId) || 0),
         0
       );
       startTimes.set(taskId, depMax);
@@ -405,7 +405,7 @@ export class QuantumComputingService {
     const circuit = await this.prisma.quantumCircuit.create({
       data: {
         id: randomBytes(16).toString('hex'),
-        userId: circuitData.userId,
+        userId: circuitData.userId || 'default-user',
         name: circuitData.name,
         description: circuitData.description,
         qubits: circuitData.qubits,
@@ -450,10 +450,11 @@ export class QuantumComputingService {
       data: {
         id: randomBytes(16).toString('hex'),
         userId: circuit.userId,
-        circuitId,
+        graphId: circuitId, // Use graphId to store circuit reference
         type: 'simulation',
         status: 'completed',
         priority: 'medium',
+        backend: 'simulator',
         result: JSON.stringify(result),
         createdAt: new Date(),
         completedAt: new Date(),
