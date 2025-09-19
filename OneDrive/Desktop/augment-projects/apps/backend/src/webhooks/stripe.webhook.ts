@@ -5,10 +5,20 @@ const prisma = new PrismaClient();
 
 // Stripe webhook signature verification (mock for now)
 const verifyStripeSignature = (payload: string, signature: string): boolean => {
-  // In production, use actual Stripe signature verification
-  // const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-  // return stripe.webhooks.constructEvent(payload, signature, process.env.STRIPE_WEBHOOK_SECRET);
-  return true; // Mock verification
+  // Production Stripe signature verification
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+    console.warn('Stripe keys not configured, using mock verification');
+    return true; // Allow in development
+  }
+
+  try {
+    const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+    stripe.webhooks.constructEvent(payload, signature, process.env.STRIPE_WEBHOOK_SECRET);
+    return true;
+  } catch (err) {
+    console.error('Stripe webhook signature verification failed:', err);
+    return false;
+  }
 };
 
 export async function stripeWebhook(req: Request, res: Response): Promise<void> {

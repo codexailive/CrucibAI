@@ -1,6 +1,6 @@
-import { EventEmitter } from 'events';
 import { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
+import { EventEmitter } from 'events';
 import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
@@ -118,7 +118,7 @@ export class SecurityComplianceService extends EventEmitter {
         include: { subscription: true },
       });
 
-      if (!user || !await this.verifyPassword(password, user.passwordHash)) {
+      if (!user || !await this.verifyPassword(password, user.encrypted_password)) {
         await this.logSecurityEvent({
           type: 'authentication',
           severity: 'medium',

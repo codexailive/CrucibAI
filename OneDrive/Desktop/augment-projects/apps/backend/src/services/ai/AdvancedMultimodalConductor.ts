@@ -1,7 +1,7 @@
-import OpenAI from 'openai';
 import { PrismaClient } from '@prisma/client';
 import { EventEmitter } from 'events';
 import { createReadStream } from 'fs';
+import OpenAI from 'openai';
 import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
@@ -416,8 +416,12 @@ export class AdvancedMultimodalConductor extends EventEmitter {
     const month = new Date().toISOString().slice(0, 7);
     
     await prisma.usageTracking.upsert({
-      where: { userId_month: { userId, month } },
-      update: { amount: { increment: amount } },
+      where: {
+        userId_month: { userId, month }
+      },
+      update: {
+        amount: { increment: amount }
+      },
       create: {
         userId,
         month,

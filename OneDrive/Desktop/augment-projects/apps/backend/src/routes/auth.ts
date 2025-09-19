@@ -49,6 +49,7 @@ router.post('/register', async (req: Request, res: Response) => {
         name,
         encrypted_password: hashedPassword,
         passwordHash: hashedPassword,
+        password: hashedPassword,
       },
     });
 

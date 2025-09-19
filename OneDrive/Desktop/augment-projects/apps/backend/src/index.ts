@@ -9,73 +9,141 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-// Import services
+// Import production services
 import { AdvancedMultimodalConductor } from './services/ai/AdvancedMultimodalConductor';
+import { RealAIProviderService } from './services/ai/RealAIProviderService';
 import { QuantumComputingService } from './services/quantum/QuantumComputingService';
+import { AWSBraketService } from './services/quantum/AWSBraketService';
+import { QuantumJobQueue } from './services/quantum/QuantumJobQueue';
 import { ARVRDevelopmentService } from './services/arvr/ARVRDevelopmentService';
 import { AdvancedDeploymentService } from './services/deployment/AdvancedDeploymentService';
 import { TeamCollaborationService } from './services/collaboration/TeamCollaborationService';
 import { AdvancedAnalyticsService } from './services/analytics/AdvancedAnalyticsService';
 import { SecurityComplianceService } from './services/security/SecurityComplianceService';
 import { MarketplaceService } from './services/marketplace/MarketplaceService';
+import { GDPRService } from './services/compliance/GDPRService';
+import { monitoringService } from './services/monitoring/MonitoringService';
+
+// Import middleware
+import {
+  securityHeaders,
+  generalRateLimit,
+  authRateLimit,
+  apiRateLimit,
+  securityLogger
+} from './middleware/security';
 
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: process.env.FRONTEND_ORIGIN || "http://localhost:5173",
     methods: ["GET", "POST"]
   }
 });
 
-// Security middleware
-app.use(helmet());
+// Production security middleware
+app.use(securityHeaders);
+app.use(securityLogger);
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  origin: process.env.FRONTEND_ORIGIN || "http://localhost:5173",
   credentials: true
 }));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+// Production rate limiting
+app.use('/api/auth', authRateLimit as any);
+app.use('/api', apiRateLimit as any);
+app.use(generalRateLimit as any);
+
+// Monitoring middleware
+app.use(monitoringService.performanceMiddleware());
+
+// JWT Authentication middleware
+app.use(async (req, _res, next) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+
+    if (token) {
+      const jwt = require('jsonwebtoken');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+
+      const { PrismaClient } = require('@prisma/client');
+      const prisma = new PrismaClient();
+
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.userId },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true
+        }
+      });
+
+      if (user) {
+        req.user = user;
+      }
+    }
+
+    next();
+  } catch (error) {
+    next();
+  }
 });
-app.use(limiter as any);
 
 // Body parsing middleware
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Initialize services
+// Initialize production services
 const aiConductor = new AdvancedMultimodalConductor();
+const realAIProvider = new RealAIProviderService();
 const quantumService = new QuantumComputingService();
+const awsBraketService = new AWSBraketService();
+const quantumJobQueue = new QuantumJobQueue();
 const arvrService = new ARVRDevelopmentService();
 const deploymentService = new AdvancedDeploymentService();
 const collaborationService = new TeamCollaborationService();
 const analyticsService = new AdvancedAnalyticsService();
 const securityService = new SecurityComplianceService();
 const marketplaceService = new MarketplaceService();
+const gdprService = new GDPRService();
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    version: '3.0.0',
-    services: {
-      ai: 'operational',
-      quantum: 'operational',
-      arvr: 'operational',
-      deployment: 'operational',
-      collaboration: 'operational',
-      analytics: 'operational',
-      security: 'operational',
-      marketplace: 'operational'
-    }
-  });
+// Start quantum job processor
+quantumJobQueue.startJobProcessor();
+
+// Start periodic monitoring
+monitoringService.startPeriodicMetrics();
+
+// Production health check endpoint
+app.get('/health', async (req, res) => {
+  try {
+    const healthMetrics = await monitoringService.getHealthMetrics();
+    res.json({
+      ...healthMetrics,
+      version: '3.0.0',
+      environment: process.env.NODE_ENV || 'development'
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'unhealthy',
+      timestamp: new Date().toISOString(),
+      error: 'Health check failed'
+    });
+  }
 });
 
+// Import new routes
+import authRoutes from './routes/auth';
+import billingRoutes from './routes/billing';
+import supportRoutes from './routes/support';
+import marketplaceRoutes from './routes/marketplace';
+
 // API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/billing', billingRoutes);
+app.use('/api/support', supportRoutes);
+app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/ai', createAIRoutes());
 app.use('/api/quantum', createQuantumRoutes());
 app.use('/api/arvr', createARVRRoutes());
@@ -83,7 +151,6 @@ app.use('/api/deployment', createDeploymentRoutes());
 app.use('/api/collaboration', createCollaborationRoutes());
 app.use('/api/analytics', createAnalyticsRoutes());
 app.use('/api/security', createSecurityRoutes());
-app.use('/api/marketplace', createMarketplaceRoutes());
 
 // Socket.IO for real-time features
 io.on('connection', (socket) => {

@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { NextFunction, Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
+import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 
@@ -14,6 +14,7 @@ declare global {
         id: string;
         email: string;
         name: string;
+        role?: string;
         subscription?: any;
       };
     }
